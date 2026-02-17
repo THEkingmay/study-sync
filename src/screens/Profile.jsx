@@ -1,5 +1,4 @@
-import {View , Text} from 'react-native'
-import { ScrollView } from 'react-native/types_generated/index'
+import {View , Text , ScrollView} from 'react-native'
 
 export default function ProfileScreen(){
     return (

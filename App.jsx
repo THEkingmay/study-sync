@@ -10,6 +10,7 @@ import PlannerScreen from "./src/screens/Planner";
 import ProfileScreen from "./src/screens/Profile";
 import TimetableScreen from "./src/screens/Timetable";
 
+
 const Tabs = createBottomTabNavigator();
 
 export default function App() {
@@ -21,11 +22,16 @@ export default function App() {
             headerShown: false,
   
             tabBarStyle: {
-              backgroundColor: '#D1C4E9', 
+              position : "absolute",
+              backgroundColor: '#D8BFD8', 
+              borderWidth : 1, 
+              borderTopLeftRadius : 20,
+              borderTopRightRadius : 20 ,
               height: 100,
               borderTopWidth: 0,
               paddingTop : 20 , 
-              paddingBottom : 100
+              paddingBottom : 100 ,
+              elevation : 20
             },
             tabBarShowLabel: false, 
             tabBarIcon: ({ focused }) => {
@@ -85,8 +91,8 @@ const styles = StyleSheet.create({
   tabItemContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 90,
-    height: 80,
+    width:80,
+    height: 70,
     borderRadius: 20,
     marginTop: 15,
   },
