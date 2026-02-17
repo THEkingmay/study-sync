@@ -1,97 +1,157 @@
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Navbar from '../components/Navbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { QuickAddModal } from '../components/QuickAdd';
 
 export default function DashboardScreen() {
     const navigation = useNavigation();
+    const [isOpenModal, setIsOpenModal] = useState(false);
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <Navbar />
-            <ScrollView style={styles.container}>
-                
-                <View style={styles.card}>
-                    <View style={[styles.cardHeader, { backgroundColor: '#f5f6ff' }]}>
-                        <Feather name="clock" size={18} color="#5e6ad2" />
-                        <Text style={[styles.headerText, { color: '#5e6ad2' }]}>คาบเรียนถัดไป</Text>
-                    </View>
-                    <View style={styles.cardBody}>
-                        <Feather name="book-open" size={48} color="#ccc" style={{ marginBottom: 12 }} />
-                        <Text style={styles.emptyText}>ไม่มีคาบเรียนถัดไป</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
-                            <Text style={styles.actionText}>เพิ่มตารางเรียน</Text>
+        <>
+            <QuickAddModal isOpen={isOpenModal} onClose={() => setIsOpenModal(false)} />
+            <SafeAreaView style={styles.safeArea}>
+                <Navbar />
+                <ScrollView
+                    style={styles.container}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.headerSection}>
+                        <View>
+                            <Text style={styles.welcomeText}>สวัสดีวันอังคาร 👋</Text>
+                            <Text style={styles.dashboardTitle}>Dashboard</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.quickAddBtn}
+                            onPress={() => setIsOpenModal(true)}
+                        >
+                            <Ionicons name="add" size={20} color="#fff" />
+                            <Text style={styles.quickAddText}>Quick Add</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
 
-                <View style={styles.card}>
-                    <View style={[styles.cardHeader, { backgroundColor: '#fff5f0' }]}>
-                        <Ionicons name="alert-circle-outline" size={20} color="#c67c52" />
-                        <Text style={[styles.headerText, { color: '#c67c52' }]}>สอบที่ใกล้จะถึง (7 วันข้างหน้า)</Text>
+                    <View style={styles.card}>
+                        <View style={[styles.cardHeader, { backgroundColor: '#f5f6ff' }]}>
+                            <Feather name="clock" size={18} color="#5e6ad2" />
+                            <Text style={[styles.headerText, { color: '#5e6ad2' }]}>คาบเรียนถัดไป</Text>
+                        </View>
+                        <View style={styles.cardBody}>
+                            <Feather name="book-open" size={48} color="#ccc" style={{ marginBottom: 12 }} />
+                            <Text style={styles.emptyText}>ไม่มีคาบเรียนถัดไป</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
+                                <Text style={styles.actionText}>เพิ่มตารางเรียน</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <View style={styles.cardBody}>
-                        <Ionicons name="alert-circle-outline" size={48} color="#ccc" style={{ marginBottom: 12 }} />
-                        <Text style={styles.emptyText}>ไม่มีการสอบในช่วง 7 วันข้างหน้า</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
-                            <Text style={styles.actionText}>เพิ่มตารางสอบ</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
 
-            </ScrollView>
-        </SafeAreaView>
+                    <View style={styles.card}>
+                        <View style={[styles.cardHeader, { backgroundColor: '#fff5f0' }]}>
+                            <Ionicons name="alert-circle-outline" size={20} color="#c67c52" />
+                            <Text style={[styles.headerText, { color: '#c67c52' }]}>สอบที่ใกล้จะถึง (7 วันข้างหน้า)</Text>
+                        </View>
+                        <View style={styles.cardBody}>
+                            <Ionicons name="alert-circle-outline" size={48} color="#ccc" style={{ marginBottom: 12 }} />
+                            <Text style={styles.emptyText}>ไม่มีการสอบในช่วง 7 วันข้างหน้า</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
+                                <Text style={styles.actionText}>เพิ่มตารางสอบ</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </>
+
     );
 }
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#FFF0F5',
+        backgroundColor: '#fbfbfb',
     },
     container: {
         flex: 1,
         padding: 16,
+        paddingBottom: 100,
+    },
+    headerSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+        marginTop: 8,
+    },
+    welcomeText: {
+        fontSize: 14,
+        color: '#888',
+        fontWeight: '500',
+    },
+    dashboardTitle: {
+        fontSize: 28,
+        fontWeight: '800',
+        color: '#1a1a1a',
+    },
+    quickAddBtn: {
+        backgroundColor: '#1a1a1a',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    quickAddText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
+        marginLeft: 4,
     },
     card: {
         backgroundColor: '#fff',
-        borderRadius: 12,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#efefef',
+        borderColor: '#f0f0f0',
         marginBottom: 16,
         overflow: 'hidden',
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
-        shadowRadius: 2,
+        shadowRadius: 4,
     },
     cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 10,
+        paddingVertical: 12,
         paddingHorizontal: 16,
     },
     headerText: {
         fontSize: 15,
-        fontWeight: '600',
+        fontWeight: '700',
         marginLeft: 8,
     },
     cardBody: {
-        paddingVertical: 32,
+        paddingVertical: 40,
         alignItems: 'center',
         justifyContent: 'center',
     },
     emptyText: {
         fontSize: 14,
-        color: '#777',
+        color: '#999',
         marginBottom: 8,
     },
     actionText: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#000',
-        marginTop: 4,
+        color: '#1a1a1a',
+        textDecorationLine: 'underline',
     },
 });
