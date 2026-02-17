@@ -3,7 +3,7 @@ import DataContextProvider from "./src/contexts/DataProvider";
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet ,Image } from 'react-native';
 
 import DashboardScreen from "./src/screens/Dashboard";
 import PlannerScreen from "./src/screens/Planner";
@@ -19,8 +19,7 @@ export default function App() {
       <NavigationContainer>
         <Tabs.Navigator
           screenOptions={({ route }) => ({
-            headerShown: false,
-  
+            headerShown : false ,
             tabBarStyle: {
               position : "absolute",
               backgroundColor: '#D8BFD8', 
