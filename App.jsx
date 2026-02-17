@@ -3,7 +3,7 @@ import DataContextProvider from "./src/contexts/DataProvider";
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet ,Image } from 'react-native';
 
 import DashboardScreen from "./src/screens/Dashboard";
 import PlannerScreen from "./src/screens/Planner";
@@ -18,10 +18,10 @@ export default function App() {
       <NavigationContainer>
         <Tabs.Navigator
           screenOptions={({ route }) => ({
-            headerShown: false,
+            // headerShown: false,
   
             tabBarStyle: {
-              backgroundColor: '#D1C4E9', 
+              backgroundColor: '#D8BFD8', 
               height: 100,
               borderTopWidth: 0,
               paddingTop : 20 , 
@@ -74,7 +74,20 @@ export default function App() {
           <Tabs.Screen name="dashboard" component={DashboardScreen} />
           <Tabs.Screen name="timetable" component={TimetableScreen} />
           <Tabs.Screen name="planner" component={PlannerScreen} />
-          <Tabs.Screen name="profile" component={ProfileScreen} />
+          <Tabs.Screen name="profile" component={ProfileScreen} 
+            options = {{
+              headerTitle: () => (
+                <View style={{flexDirection:'row',alignItems :'center' , color : 'blue'}}>
+                  <Image source={require('./assets/IconHeader.png')}
+                  style={{ width: 60, height: 60, borderRadius: 20 }}
+                  /> 
+                  <Text>
+                   Student Sync
+                  </Text>
+                </View>
+              )
+            }}
+          />
         </Tabs.Navigator>
       </NavigationContainer>
     </DataContextProvider>
