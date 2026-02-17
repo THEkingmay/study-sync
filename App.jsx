@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   tabItemActive: {
-    backgroundColor: 'white', 
+    backgroundColor: '#ffeeff', 
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
