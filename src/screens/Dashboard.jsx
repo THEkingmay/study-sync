@@ -31,6 +31,13 @@ export default function DashboardScreen() {
     const formattedTime = now.toLocaleTimeString("th-TH", {
         hour: '2-digit', minute: '2-digit'
     });
+
+    const displayDecimalTime = (decimalTime) => {
+        if (decimalTime === "" || decimalTime === undefined) return "เลือกเวลา";
+        const h = Math.floor(decimalTime);
+        const m = Math.round((decimalTime - h) * 60);
+        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+    };
     const getNextClass = () => {
         if (!studyData || studyData.length === 0) return null;
 
@@ -68,8 +75,8 @@ export default function DashboardScreen() {
     };
     const nextClass = getNextClass();
 
-    const getExam = () =>{
-        
+    const getExam = () => {
+
     }
 
     return (
@@ -86,7 +93,9 @@ export default function DashboardScreen() {
                         <View>
                             <Text style={styles.welcomeText}>
                                 {greeting} วัน{dayName}
-                                {greeting} {profileData.fullname || "นิสิต"} 👋
+                            </Text>
+                            <Text style={styles.welcomeText}>
+                                {profileData.fullname || "นิสิต"} 👋
                             </Text>
                             <Text>{formattedDate}</Text>
                             <Text>เวลาล่าสุด {formattedTime}</Text>
@@ -119,7 +128,7 @@ export default function DashboardScreen() {
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <Feather name="calendar" size={14} color="#666" style={{ marginRight: 6 }} />
                                     <Text style={{ color: '#666', fontSize: 14 }}>
-                                        วัน: {daysTH[daysOfWeek.findIndex(d => d === nextClass.day)]} เวลา: {nextClass.start} - {nextClass.end}
+                                        วัน: {daysTH[daysOfWeek.findIndex(d => d === nextClass.day)]} , เวลา: {displayDecimalTime(nextClass.start)} - {displayDecimalTime(nextClass.end)}
                                     </Text>
                                 </View>
                             </View>
