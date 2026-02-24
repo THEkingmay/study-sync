@@ -1,8 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+// 1. นำเข้า useNavigation
+import { useNavigation } from '@react-navigation/native';
 
 export function QuickAddModal({ isOpen, onClose }) {
+    // 2. เรียกใช้งาน navigation hook
+    const navigation = useNavigation();
+
+    const handleNavigate = (tabName) => {
+        onClose(); // ปิด Modal ก่อน
+        // 3. ส่ง params ชื่อ 'initialTab' ไปยังหน้า Planner
+        navigation.navigate('planner', { initialTab: tabName });
+    };
+
     return (
         <Modal
             animationType="fade"
@@ -14,34 +25,36 @@ export function QuickAddModal({ isOpen, onClose }) {
         >
             <Pressable style={styles.modalOverlay} onPress={onClose}>
                 <View style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Quick Add</Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <Ionicons name="close" size={24} color="#333" />
-                        </TouchableOpacity>
-                    </View>
-
+                    {/* ... ส่วนหัวคงเดิม ... */}
+                    
                     <View style={styles.buttonGrid}>
-                        <TouchableOpacity style={styles.menuButton}>
+                        {/* 4. ใส่ onPress เพื่อเรียกฟังก์ชัน navigate */}
+                        <TouchableOpacity 
+                            style={styles.menuButton}
+                            onPress={() => handleNavigate('activities')}
+                        >
                             <View style={[styles.iconContainer, { backgroundColor: '#E8EAF6' }]}>
                                 <Ionicons name="book" size={24} color="#3F51B5" />
                             </View>
                             <Text style={styles.menuText}>กิจกรรม</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.menuButton}>
+                        <TouchableOpacity 
+                            style={styles.menuButton}
+                            onPress={() => handleNavigate('study')}
+                        >
                             <View style={[styles.iconContainer, { backgroundColor: '#FFF3E0' }]}>
                                 <Ionicons name="document-text" size={24} color="#FB8C00" />
                             </View>
                             <Text style={styles.menuText}>แผนอ่านหนังสือ</Text>
                         </TouchableOpacity>
-
                     </View>
                 </View>
             </Pressable>
         </Modal>
     );
 }
+// ... styles คงเดิม ...
 
 const styles = StyleSheet.create({
     modalOverlay: {
