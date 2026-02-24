@@ -35,6 +35,12 @@ export default function Timetable() {
     const [editingItem, setEditingItem] = useState(null);
 
     const data = activeTab === "study" ? studyData : examData;
+    const displayDecimalTime = (decimalTime) => {
+        if (decimalTime === "" || decimalTime === undefined) return "เลือกเวลา";
+        const h = Math.floor(decimalTime);
+        const m = Math.round((decimalTime - h) * 60);
+        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+    };
 
     const isTimeOverlap = (newItem) => {
         return studyData.some((item) => {
@@ -102,7 +108,7 @@ export default function Timetable() {
 
     const renderStudy = () =>
         days.map((day) => {
-            const subjects = data.filter((s) => s.day === day.value).sort((a, b) => a.start-b.start);
+            const subjects = data.filter((s) => s.day === day.value).sort((a, b) => a.start - b.start);
 
             return (
                 <View key={day.value} style={styles.card}>
@@ -121,7 +127,7 @@ export default function Timetable() {
                                     <Text style={styles.subjectCode}>{item.code}</Text>
                                     <Text style={styles.subjectName}>{item.name}</Text>
                                     <Text style={styles.subjectTime}>
-                                        🕒 {item.start} - {item.end} | 📍 ห้อง {item.room}
+                                        🕒 {displayDecimalTime(item.start)}- {displayDecimalTime(item.end)} | 📍 ห้อง {item.room}
                                     </Text>
                                 </View>
                                 <TouchableOpacity onPress={() => handleDelete(item.id, "study")} style={styles.deleteBtn}>

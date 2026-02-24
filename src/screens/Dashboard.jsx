@@ -69,6 +69,10 @@ export default function DashboardScreen() {
     };
     const nextClass = getNextClass();
 
+    const getExam = () =>{
+        
+    }
+
     return (
         <>
             <QuickAddModal isOpen={isOpenModal} onClose={() => setIsOpenModal(false)} />
