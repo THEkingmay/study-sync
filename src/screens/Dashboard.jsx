@@ -7,11 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 import { QuickAddModal } from '../components/QuickAdd';
 import { useData } from '../contexts/DataProvider';
 
-
 export default function DashboardScreen() {
     const navigation = useNavigation();
     const [isOpenModal, setIsOpenModal] = useState(false);
-    const { studyData, examData } = useData();
+    const { studyData, examData, profileData } = useData();
 
     const now = new Date();
     const hour = now.getHours();
@@ -83,6 +82,7 @@ export default function DashboardScreen() {
                         <View>
                             <Text style={styles.welcomeText}>
                                 {greeting} วัน{dayName}
+                                {greeting} {profileData.fullname || "นิสิต"} 👋
                             </Text>
                             <Text>{formattedDate}</Text>
                             <Text>เวลาล่าสุด {formattedTime}</Text>
