@@ -1,14 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Navbar from '../components/Navbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { QuickAddModal } from '../components/QuickAdd';
+import { useData } from '../contexts/DataProvider';
+
 
 export default function DashboardScreen() {
     const navigation = useNavigation();
     const [isOpenModal, setIsOpenModal] = useState(false);
+    const { studyData, examData } = useData();
+
+    const now = new Date();
+    const hour = now.getHours();
+
+    let greeting = "";
+    if (hour < 12) greeting = "สวัสดีตอนเช้า";
+    else if (hour < 17) greeting = "สวัสดีตอนบ่าย";
+    else if (hour < 19) greeting = "สวัสดีตอนเย็น";
+    else greeting = "สวัสดีตอนกลางคืน";
+
+    const daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = daysTH[now.getDay()];
+
+    const formattedDate = now.toLocaleDateString("th-TH", {
+        day: "numeric", month: "long", year: "numeric"
+    });
+    const formattedTime = now.toLocaleTimeString("th-TH", {
+        hour: '2-digit', minute: '2-digit'
+    });
+    const getNextClass = () => {
+        if (!studyData || studyData.length === 0) return null;
+
+        const currentDayIndex = now.getDay();
+        // แปลงเวลาปัจจุบันเป็นทศนิยม เช่น 10:30 -> 10.5
+        const currentTimeDecimal = now.getHours() + (now.getMinutes() / 60);
+
+        // คำนวณระยะห่างของวันสำหรับทุกรายวิชา
+        const upcomingClasses = studyData.map(cls => {
+            const classDayIndex = daysOfWeek.indexOf(cls.day);
+            let daysAhead = classDayIndex - currentDayIndex;
+
+            // ถ้าน้อยกว่า 0 แปลว่าเป็นวันของสัปดาห์หน้า (เช่น วันนี้วันอังคาร คลาสเรียนวันจันทร์)
+            if (daysAhead < 0) {
+                daysAhead += 7;
+            }
+            // ถ้าเป็นวันเดียวกัน แต่เวลาเริ่มเรียนน้อยกว่าหรือเท่ากับเวลาปัจจุบัน แปลว่าคลาสนี้ผ่านไปแล้ว ให้ปัดไปสัปดาห์หน้า
+            else if (daysAhead === 0 && Number(cls.start) <= currentTimeDecimal) {
+                daysAhead += 7;
+            }
+
+            return { ...cls, daysAhead };
+        });
+
+        // เรียงลำดับตามความใกล้ของวัน (daysAhead) ก่อน แล้วค่อยเรียงตามเวลาเริ่ม (start)
+        upcomingClasses.sort((a, b) => {
+            if (a.daysAhead !== b.daysAhead) {
+                return a.daysAhead - b.daysAhead;
+            }
+            return Number(a.start) - Number(b.start);
+        });
+
+        // คืนค่าคลาสที่ใกล้ที่สุด
+        return upcomingClasses[0] || null;
+    };
+    const nextClass = getNextClass();
 
     return (
         <>
@@ -22,7 +81,11 @@ export default function DashboardScreen() {
                 >
                     <View style={styles.headerSection}>
                         <View>
-                            <Text style={styles.welcomeText}>สวัสดีวันอังคาร 👋</Text>
+                            <Text style={styles.welcomeText}>
+                                {greeting} วัน{dayName}
+                            </Text>
+                            <Text>{formattedDate}</Text>
+                            <Text>เวลาล่าสุด {formattedTime}</Text>
                             <Text style={styles.dashboardTitle}>Dashboard</Text>
                         </View>
                         <TouchableOpacity
@@ -39,13 +102,32 @@ export default function DashboardScreen() {
                             <Feather name="clock" size={18} color="#5e6ad2" />
                             <Text style={[styles.headerText, { color: '#5e6ad2' }]}>คาบเรียนถัดไป</Text>
                         </View>
-                        <View style={styles.cardBody}>
-                            <Feather name="book-open" size={48} color="#ccc" style={{ marginBottom: 12 }} />
-                            <Text style={styles.emptyText}>ไม่มีคาบเรียนถัดไป</Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
-                                <Text style={styles.actionText}>เพิ่มตารางเรียน</Text>
-                            </TouchableOpacity>
-                        </View>
+
+                        {nextClass ? (
+                            <View style={[styles.cardBody, { alignItems: 'flex-start', paddingHorizontal: 20, paddingVertical: 24 }]}>
+                                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 4 }}>
+                                    {nextClass.code} , {nextClass.name}
+                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                                    <Feather name="map-pin" size={14} color="#666" style={{ marginRight: 6 }} />
+                                    <Text style={{ color: '#666', fontSize: 14 }}>ห้อง: {nextClass.room}</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Feather name="calendar" size={14} color="#666" style={{ marginRight: 6 }} />
+                                    <Text style={{ color: '#666', fontSize: 14 }}>
+                                        วัน: {daysTH[daysOfWeek.findIndex(d => d === nextClass.day)]} เวลา: {nextClass.start} - {nextClass.end}
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            <View style={styles.cardBody}>
+                                <Feather name="book-open" size={48} color="#ccc" style={{ marginBottom: 12 }} />
+                                <Text style={styles.emptyText}>ไม่มีคาบเรียนถัดไป</Text>
+                                <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
+                                    <Text style={styles.actionText}>เพิ่มตารางเรียน</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
 
                     <View style={styles.card}>

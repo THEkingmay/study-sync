@@ -12,7 +12,13 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
+const days = [
+    { label: "จันทร์", value: "Monday" },
+    { label: "อังคาร", value: "Tuesday" },
+    { label: "พุธ", value: "Wednesday" },
+    { label: "พฤหัสบดี", value: "Thursday" },
+    { label: "ศุกร์", value: "Friday" },
+];
 const themeColors = [
     "#6C5CE7", "#8E44AD", "#E84393", "#FF7675", "#FD7E14",
     "#F1C40F", "#2ECC71", "#16A085", "#00CEC9",
@@ -85,7 +91,7 @@ export default function TimetableModal({
                                         onValueChange={(v) => setForm({ ...form, day: v })}
                                     >
                                         {days.map((d) => (
-                                            <Picker.Item key={d} label={d} value={d} />
+                                            <Picker.Item key={d.value} label={d.label} value={d.value} />
                                         ))}
                                     </Picker>
                                 </View>
@@ -96,8 +102,9 @@ export default function TimetableModal({
                                         <TextInput
                                             style={styles.input}
                                             placeholder="08:00"
+                                            keyboardType="number-pad"
                                             value={form.start}
-                                            onChangeText={(t) => setForm({ ...form, start: t })}
+                                            onChangeText={(t) => setForm({ ...form, start: Number(t) })}
                                         />
                                     </View>
                                     <View style={styles.halfInput}>
@@ -105,8 +112,9 @@ export default function TimetableModal({
                                         <TextInput
                                             style={styles.input}
                                             placeholder="10:00"
+                                            keyboardType="number-pad"
                                             value={form.end}
-                                            onChangeText={(t) => setForm({ ...form, end: t })}
+                                            onChangeText={(t) => setForm({ ...form, end: Number(t) })}
                                         />
                                     </View>
                                 </View>

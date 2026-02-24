@@ -9,11 +9,18 @@ import {
 import Navbar from "../components/Navbar";
 import TimetableModal from "../components/TimetableModal";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useData } from "../contexts/DataProvider";
 
-const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
+const days = [
+    { label: "จันทร์", value: "Monday" },
+    { label: "อังคาร", value: "Tuesday" },
+    { label: "พุธ", value: "Wednesday" },
+    { label: "พฤหัสบดี", value: "Thursday" },
+    { label: "ศุกร์", value: "Friday" },
+];
 
 const initialFormState = {
-    code: "", name: "", room: "", day: "จันทร์",
+    code: "", name: "", room: "", day: "Monday",
     start: "", end: "", color: "#6C5CE7",
     examType: "mid", examDate: "", examTime: "",
 };
@@ -23,8 +30,8 @@ export default function Timetable() {
     const [modalVisible, setModalVisible] = useState(false);
     const [form, setForm] = useState(initialFormState);
 
-    const [studyData, setStudyData] = useState([]);
-    const [examData, setExamData] = useState([]);
+    const { studyData, setStudyData, examData, setExamData } = useData()
+
     const [editingItem, setEditingItem] = useState(null);
 
     const data = activeTab === "study" ? studyData : examData;
@@ -40,6 +47,10 @@ export default function Timetable() {
     const handleSave = () => {
         if (!form.code || !form.name) {
             alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            return;
+        }
+        if (form.start >= form.end) {
+            alert("เวลาเริ่มต้องน้อยกว่าเวลาจบ");
             return;
         }
 
@@ -91,11 +102,11 @@ export default function Timetable() {
 
     const renderStudy = () =>
         days.map((day) => {
-            const subjects = data.filter((s) => s.day === day).sort((a, b) => a.start.localeCompare(b.start));
+            const subjects = data.filter((s) => s.day === day.value).sort((a, b) => a.start-b.start);
 
             return (
-                <View key={day} style={styles.card}>
-                    <Text style={styles.dayTitle}>{day}</Text>
+                <View key={day.value} style={styles.card}>
+                    <Text style={styles.dayTitle}>{day.label}</Text>
                     {subjects.length === 0 ? (
                         <Text style={styles.emptyText}>ไม่มีวิชาเรียน</Text>
                     ) : (
@@ -158,7 +169,7 @@ export default function Timetable() {
     return (
         <SafeAreaView style={styles.container}>
             <Navbar />
-            
+
             <View style={styles.headerRow}>
                 <Text style={styles.header}>ตารางเรียนและสอบ</Text>
                 <TouchableOpacity
@@ -184,7 +195,7 @@ export default function Timetable() {
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.contentScroll} contentContainerStyle={{paddingBottom : 100}} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.contentScroll} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
                 {activeTab === "study" ? renderStudy() : renderExam()}
                 <View style={{ height: 40 }} />
             </ScrollView>
