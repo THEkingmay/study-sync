@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import PlannerItem from "../components/PlannerItem.jsx";
 import PlannerFormModal from "../components/PlannerFormModal";
 import Navbar from "../components/Navbar.jsx";
-
+import { useData } from "../contexts/DataProvider";
 
 export const TABS = [
     { key: "activities", label: "กิจกรรม", color: "#6366f1", icon: "🎨" },
@@ -34,7 +34,8 @@ export const INITIAL_FORM = {
 
 export default function Planner() {
     const [activeTab, setActiveTab] = useState("activities");
-    const [data, setData] = useState({ activities: [], study: [] });
+    // const [data, setData] = useState({ activities: [], study: [] });
+    const { plannerData, setPlannerData } = useData();
     const [modalVisible, setModalVisible] = useState(false);
     const [form, setForm] = useState(INITIAL_FORM);
     const [editingId, setEditingId] = useState(null);
@@ -63,13 +64,13 @@ export default function Planner() {
         };
 
         if (editingId) {
-            setData(prev => ({
+            setPlannerData(prev => ({
                 ...prev,
                 [activeTab]: prev[activeTab].map(item => item.id === editingId ? { ...item, ...entryData } : item)
             }));
         } else {
             const newItem = { id: Date.now().toString(), ...entryData, completed: false };
-            setData(prev => ({ ...prev, [activeTab]: [newItem, ...prev[activeTab]] }));
+            setPlannerData(prev => ({ ...prev, [activeTab]: [newItem, ...prev[activeTab]] }));
         }
 
         setModalVisible(false);
@@ -78,7 +79,7 @@ export default function Planner() {
     };
 
     const handleToggleComplete = (id) => {
-        setData(prev => ({
+        setPlannerData(prev => ({
             ...prev,
             [activeTab]: prev[activeTab].map(i => i.id === id ? { ...i, completed: !i.completed } : i)
         }));
@@ -93,14 +94,14 @@ export default function Planner() {
     const handleDelete = (id) => {
         Alert.alert("ลบรายการ", "ยืนยันการลบ?", [
             { text: "ยกเลิก" },
-            { text: "ลบ", onPress: () => setData(prev => ({ ...prev, [activeTab]: prev[activeTab].filter(i => i.id !== id) })) }
+            { text: "ลบ", onPress: () => setPlannerData(prev => ({ ...prev, [activeTab]: prev[activeTab].filter(i => i.id !== id) })) }
         ]);
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <Navbar />
-            <View style={{paddingHorizontal : 20}}>
+            <View style={{ paddingHorizontal: 20 }}>
                 <View style={styles.headerSection}>
                     <Text style={styles.welcomeText}>รายการของคุณ 📋</Text>
                     <Text style={styles.header}>My Planner</Text>
@@ -128,7 +129,7 @@ export default function Planner() {
                 </TouchableOpacity>
 
                 <FlatList
-                    data={data[activeTab]}
+                    data={plannerData[activeTab]}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <PlannerItem
@@ -139,7 +140,15 @@ export default function Planner() {
                             onDelete={handleDelete}
                         />
                     )}
+                    ListEmptyComponent={
+                        <View style={{ alignItems: "center", marginTop: 40 }}>
+                            <Text style={{ color: "#999", fontSize: 16 }}>
+                                ไม่มีข้อมูล
+                            </Text>
+                        </View>
+                    }
                 />
+
 
             </View>
             <PlannerFormModal
