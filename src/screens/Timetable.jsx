@@ -9,6 +9,7 @@ import {
 import Navbar from "../components/Navbar";
 import TimetableModal from "../components/TimetableModal";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useData } from '../contexts/DataProvider';
 
 const days = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"];
 
@@ -19,12 +20,15 @@ const initialFormState = {
 };
 
 export default function Timetable() {
+
+    const { studyData, setStudyData, examData, setExamData } = useData();
+
     const [activeTab, setActiveTab] = useState("study");
     const [modalVisible, setModalVisible] = useState(false);
     const [form, setForm] = useState(initialFormState);
 
-    const [studyData, setStudyData] = useState([]);
-    const [examData, setExamData] = useState([]);
+    // const [studyData, setStudyData] = useState([]);
+    // const [examData, setExamData] = useState([]);
     const [editingItem, setEditingItem] = useState(null);
 
     const data = activeTab === "study" ? studyData : examData;

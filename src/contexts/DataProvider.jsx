@@ -1,15 +1,24 @@
-import { useContext , createContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-const DataContext = createContext()
+const DataContext = createContext();
 
+export default function DataContextProvider({ children }) {
 
-export default function DataContextProvider({children}){
-    
-    return(
-        <DataContext.Provider value={null}>
+    const [studyData, setStudyData] = useState([]);
+    const [examData, setExamData] = useState([]);
+
+    return (
+        <DataContext.Provider value={{
+            studyData,
+            setStudyData,
+            examData,
+            setExamData
+        }}>
             {children}
         </DataContext.Provider>
-    )
+    );
 }
 
-export const useData = () => useContext(DataContext)
+export const useData = () => {
+    return useContext(DataContext);
+};
