@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Navbar from '../components/Navbar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,23 +38,20 @@ export default function DashboardScreen() {
         const m = Math.round((decimalTime - h) * 60);
         return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
     };
+
     const getNextClass = () => {
         if (!studyData || studyData.length === 0) return null;
 
         const currentDayIndex = now.getDay();
-        // แปลงเวลาปัจจุบันเป็นทศนิยม เช่น 10:30 -> 10.5
         const currentTimeDecimal = now.getHours() + (now.getMinutes() / 60);
 
-        // คำนวณระยะห่างของวันสำหรับทุกรายวิชา
         const upcomingClasses = studyData.map(cls => {
             const classDayIndex = daysOfWeek.indexOf(cls.day);
             let daysAhead = classDayIndex - currentDayIndex;
 
-            // ถ้าน้อยกว่า 0 แปลว่าเป็นวันของสัปดาห์หน้า (เช่น วันนี้วันอังคาร คลาสเรียนวันจันทร์)
             if (daysAhead < 0) {
                 daysAhead += 7;
             }
-            // ถ้าเป็นวันเดียวกัน แต่เวลาเริ่มเรียนน้อยกว่าหรือเท่ากับเวลาปัจจุบัน แปลว่าคลาสนี้ผ่านไปแล้ว ให้ปัดไปสัปดาห์หน้า
             else if (daysAhead === 0 && Number(cls.start) <= currentTimeDecimal) {
                 daysAhead += 7;
             }
@@ -62,7 +59,6 @@ export default function DashboardScreen() {
             return { ...cls, daysAhead };
         });
 
-        // เรียงลำดับตามความใกล้ของวัน (daysAhead) ก่อน แล้วค่อยเรียงตามเวลาเริ่ม (start)
         upcomingClasses.sort((a, b) => {
             if (a.daysAhead !== b.daysAhead) {
                 return a.daysAhead - b.daysAhead;
@@ -70,14 +66,39 @@ export default function DashboardScreen() {
             return Number(a.start) - Number(b.start);
         });
 
-        // คืนค่าคลาสที่ใกล้ที่สุด
         return upcomingClasses[0] || null;
     };
+
+    const getUpcomingExams = () => {
+        if (!examData || examData.length === 0) return [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const sevenDaysLater = new Date(today);
+        sevenDaysLater.setDate(today.getDate() + 7);
+
+        const upcoming = examData.filter(exam => {
+            if (!exam.examDate) return false;
+            const [day, month, year] = exam.examDate.split('/');
+            const examDateObj = new Date(year, parseInt(month) - 1, day);
+            
+            return examDateObj >= today && examDateObj <= sevenDaysLater;
+        });
+
+        upcoming.sort((a, b) => {
+            const [dayA, monthA, yearA] = a.examDate.split('/');
+            const dateA = new Date(yearA, parseInt(monthA) - 1, dayA);
+            const [dayB, monthB, yearB] = b.examDate.split('/');
+            const dateB = new Date(yearB, parseInt(monthB) - 1, dayB);
+            return dateA - dateB;
+        });
+
+        return upcoming;
+    };
+
     const nextClass = getNextClass();
-
-    const getExam = () => {
-
-    }
+    const upcomingExams = getUpcomingExams();
 
     return (
         <>
@@ -95,7 +116,7 @@ export default function DashboardScreen() {
                                 {greeting} วัน{dayName}
                             </Text>
                             <Text style={styles.welcomeText}>
-                                {profileData.fullname || "นิสิต"} 👋
+                                {profileData?.fullname || "นิสิต"} 👋
                             </Text>
                             <Text>{formattedDate}</Text>
                             <Text>เวลาล่าสุด {formattedTime}</Text>
@@ -148,18 +169,48 @@ export default function DashboardScreen() {
                             <Ionicons name="alert-circle-outline" size={20} color="#c67c52" />
                             <Text style={[styles.headerText, { color: '#c67c52' }]}>สอบที่ใกล้จะถึง (7 วันข้างหน้า)</Text>
                         </View>
-                        <View style={styles.cardBody}>
-                            <Ionicons name="alert-circle-outline" size={48} color="#ccc" style={{ marginBottom: 12 }} />
-                            <Text style={styles.emptyText}>ไม่มีการสอบในช่วง 7 วันข้างหน้า</Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
-                                <Text style={styles.actionText}>เพิ่มตารางสอบ</Text>
-                            </TouchableOpacity>
-                        </View>
+                        
+                        {upcomingExams.length > 0 ? (
+                            <View style={{ padding: 20 }}>
+                                {upcomingExams.map((exam, index) => (
+                                    <View 
+                                        key={exam.id || index} 
+                                        style={{ 
+                                            marginBottom: index !== upcomingExams.length - 1 ? 16 : 0, 
+                                            borderBottomWidth: index !== upcomingExams.length - 1 ? 1 : 0, 
+                                            borderBottomColor: '#f0f0f0', 
+                                            paddingBottom: index !== upcomingExams.length - 1 ? 16 : 0 
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 4 }}>
+                                            {exam.code} , {exam.name} ({exam.examType === 'mid' ? 'กลางภาค' : 'ปลายภาค'})
+                                        </Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                                            <Feather name="map-pin" size={14} color="#666" style={{ marginRight: 6 }} />
+                                            <Text style={{ color: '#666', fontSize: 14 }}>ห้อง: {exam.room}</Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Feather name="calendar" size={14} color="#666" style={{ marginRight: 6 }} />
+                                            <Text style={{ color: '#666', fontSize: 14 }}>
+                                                วันที่: {exam.examDate} , เวลา: {exam.examTime_start} - {exam.examTime_end}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : (
+                            <View style={styles.cardBody}>
+                                <Ionicons name="alert-circle-outline" size={48} color="#ccc" style={{ marginBottom: 12 }} />
+                                <Text style={styles.emptyText}>ไม่มีการสอบในช่วง 7 วันข้างหน้า</Text>
+                                <TouchableOpacity onPress={() => navigation.navigate('timetable')}>
+                                    <Text style={styles.actionText}>เพิ่มตารางสอบ</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                 </ScrollView>
             </SafeAreaView>
         </>
-
     );
 }
 

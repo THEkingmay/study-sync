@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { useData } from "../contexts/DataProvider";
 
 const days = [
     { label: "จันทร์", value: "Monday" },
@@ -35,7 +36,10 @@ export default function TimetableModal({
     onSave,
     isEditing,
 }) {
-    const [activePicker, setActivePicker] = useState(null);
+    const [studyPicker, setStudyPicker] = useState(null);
+    const [examPicker, setExamPicker] = useState(null);
+
+    const { studyData } = useData();
 
     const displayDecimalTime = (decimalTime) => {
         if (decimalTime === "" || decimalTime === undefined) return "เลือกเวลา";
@@ -44,21 +48,28 @@ export default function TimetableModal({
         return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
     };
 
-    const handleConfirmPicker = (date) => {
-        if (activePicker === "start" || activePicker === "end") {
-            const decimalTime = date.getHours() + (date.getMinutes() / 60);
-            setForm({ ...form, [activePicker]: decimalTime });
-        } else if (activePicker === "examDate") {
+    const handleConfirmStudyTime = (date) => {
+        const decimalTime = date.getHours() + (date.getMinutes() / 60);
+        setForm({ ...form, [studyPicker]: decimalTime });
+        setStudyPicker(null);
+    };
+
+    const handleConfirmExam = (date) => {
+        if (examPicker === "examDate") {
             const d = date.getDate().toString().padStart(2, "0");
             const m = (date.getMonth() + 1).toString().padStart(2, "0");
             const y = date.getFullYear();
             setForm({ ...form, examDate: `${d}/${m}/${y}` });
-        } else if (activePicker === "examTime") {
+        } else if (examPicker === "examTime_start") {
             const h = date.getHours().toString().padStart(2, "0");
             const min = date.getMinutes().toString().padStart(2, "0");
-            setForm({ ...form, examTime: `${h}:${min}` });
+            setForm({ ...form, examTime_start: `${h}:${min}` });
+        } else if (examPicker === "examTime_end") {
+            const h = date.getHours().toString().padStart(2, "0");
+            const min = date.getMinutes().toString().padStart(2, "0");
+            setForm({ ...form, examTime_end: `${h}:${min}` });
         }
-        setActivePicker(null);
+        setExamPicker(null);
     };
 
     return (
@@ -109,7 +120,7 @@ export default function TimetableModal({
                                 <View style={styles.row}>
                                     <View style={styles.halfInput}>
                                         <Text style={styles.label}>เวลาเริ่ม</Text>
-                                        <TouchableOpacity style={styles.inputBox} onPress={() => setActivePicker("start")}>
+                                        <TouchableOpacity style={styles.inputBox} onPress={() => setStudyPicker("start")}>
                                             <Text style={form.start !== "" ? styles.inputText : styles.placeholderText}>
                                                 {displayDecimalTime(form.start)}
                                             </Text>
@@ -117,7 +128,7 @@ export default function TimetableModal({
                                     </View>
                                     <View style={styles.halfInput}>
                                         <Text style={styles.label}>เวลาจบ</Text>
-                                        <TouchableOpacity style={styles.inputBox} onPress={() => setActivePicker("end")}>
+                                        <TouchableOpacity style={styles.inputBox} onPress={() => setStudyPicker("end")}>
                                             <Text style={form.end !== "" ? styles.inputText : styles.placeholderText}>
                                                 {displayDecimalTime(form.end)}
                                             </Text>
@@ -140,11 +151,25 @@ export default function TimetableModal({
 
                         {activeTab === "exam" && (
                             <>
-                                <Text style={styles.label}>รหัสวิชา</Text>
-                                <TextInput style={styles.input} placeholder="เช่น CS101" value={form.code} onChangeText={(t) => setForm({ ...form, code: t })} />
-
-                                <Text style={styles.label}>ชื่อวิชา</Text>
-                                <TextInput style={styles.input} placeholder="เช่น Computer Programming" value={form.name} onChangeText={(t) => setForm({ ...form, name: t })} />
+                                <Text style={styles.label}>เลือกวิชาสอบ</Text>
+                                <View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={form.code}
+                                        onValueChange={(itemValue) => {
+                                            const selectedSubj = studyData.find(s => s.code === itemValue);
+                                            setForm({
+                                                ...form,
+                                                code: itemValue,
+                                                name: selectedSubj ? selectedSubj.name : ""
+                                            });
+                                        }}
+                                    >
+                                        <Picker.Item label="-- กรุณาเลือกวิชา --" value="" color="#a4b0be" />
+                                        {studyData.map((s) => (
+                                            <Picker.Item key={`exam-subj-${s.code}`} label={`${s.code} ${s.name}`} value={s.code} />
+                                        ))}
+                                    </Picker>
+                                </View>
 
                                 <Text style={styles.label}>ห้องสอบ</Text>
                                 <TextInput style={styles.input} placeholder="เช่น E301" value={form.room} onChangeText={(t) => setForm({ ...form, room: t })} />
@@ -158,19 +183,29 @@ export default function TimetableModal({
                                 </View>
 
                                 <View style={styles.row}>
-                                    <View style={styles.halfInput}>
+                                    <View style={{width : '100%'}}>
                                         <Text style={styles.label}>วันที่สอบ</Text>
-                                        <TouchableOpacity style={styles.inputBox} onPress={() => setActivePicker("examDate")}>
-                                            <Text style={form.examDate !== "" ? styles.inputText : styles.placeholderText}>
+                                        <TouchableOpacity style={styles.inputBox} onPress={() => setExamPicker("examDate")}>
+                                            <Text style={form.examDate ? styles.inputText : styles.placeholderText}>
                                                 {form.examDate || "เลือกวันที่"}
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
+                                </View>
+                                <View style={{flexDirection : 'row' , gap : 5}}>
                                     <View style={styles.halfInput}>
-                                        <Text style={styles.label}>เวลาสอบ</Text>
-                                        <TouchableOpacity style={styles.inputBox} onPress={() => setActivePicker("examTime")}>
-                                            <Text style={form.examTime !== "" ? styles.inputText : styles.placeholderText}>
-                                                {form.examTime || "เลือกเวลา"}
+                                        <Text style={styles.label}>เวลาเริ่มสอบ</Text>
+                                        <TouchableOpacity style={styles.inputBox} onPress={() => setExamPicker("examTime_start")}>
+                                            <Text style={form.examTime_start ? styles.inputText : styles.placeholderText}>
+                                                {form.examTime_start || "เลือกเวลา"}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.halfInput}>
+                                        <Text style={styles.label}>เวลาสิ้นสุดสอบ</Text>
+                                        <TouchableOpacity style={styles.inputBox} onPress={() => setExamPicker("examTime_end")}>
+                                            <Text style={form.examTime_start ? styles.inputText : styles.placeholderText}>
+                                                {form.examTime_end || "เลือกเวลา"}
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
@@ -188,13 +223,25 @@ export default function TimetableModal({
                 </View>
             </KeyboardAvoidingView>
 
-            <DateTimePickerModal
-                isVisible={activePicker !== null}
-                mode={activePicker === "examDate" ? "date" : "time"}
-                onConfirm={handleConfirmPicker}
-                onCancel={() => setActivePicker(null)}
-                locale="th-TH"
-            />
+            {activeTab === "study" && (
+                <DateTimePickerModal
+                    isVisible={studyPicker !== null}
+                    mode="time"
+                    onConfirm={handleConfirmStudyTime}
+                    onCancel={() => setStudyPicker(null)}
+                    locale="th-TH"
+                />
+            )}
+
+            {activeTab === "exam" && (
+                <DateTimePickerModal
+                    isVisible={examPicker !== null}
+                    mode={examPicker === "examDate" ? "date" : "time"}
+                    onConfirm={handleConfirmExam}
+                    onCancel={() => setExamPicker(null)}
+                    locale="th-TH"
+                />
+            )}
         </Modal>
     );
 }

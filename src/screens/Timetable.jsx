@@ -22,7 +22,7 @@ const days = [
 const initialFormState = {
     code: "", name: "", room: "", day: "Monday",
     start: "", end: "", color: "#6C5CE7",
-    examType: "mid", examDate: "", examTime: "",
+    examType: "mid", examDate: "", examTime_start: "", examTime_end: ""
 };
 
 export default function Timetable() {
@@ -55,11 +55,14 @@ export default function Timetable() {
             alert("กรุณากรอกข้อมูลให้ครบถ้วน");
             return;
         }
-        if (form.start >= form.end) {
+        if (form.start >= form.end && activeTab === 'study') {
             alert("เวลาเริ่มต้องน้อยกว่าเวลาจบ");
             return;
         }
-
+        if (activeTab !== 'study' && form.examTime_start >= form.examTime_end ) {
+            alert("เวลาเริ่มต้องน้อยกว่าเวลาจบ");
+            return;
+        }
         const newItem = {
             ...form,
             id: editingItem ? editingItem.id : Date.now().toString(),
