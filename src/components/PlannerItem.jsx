@@ -31,11 +31,11 @@ export default function PlannerItem({ item, activeTab, onToggle, onEdit, onDelet
         return priority ? priority.color : currentTab.color;
     };
 
-    const formatDateTime = (date) => {
-        return new Date(date).toLocaleString("th-TH", {
-            day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
-        });
-    };
+    // const formatDateTime = (date) => {
+    //     return new Date(date).toLocaleString("th-TH", {
+    //         day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+    //     });
+    // };
 
     const itemColor = getCategoryColor(item.category);
 
@@ -55,9 +55,22 @@ export default function PlannerItem({ item, activeTab, onToggle, onEdit, onDelet
                 ) : null}
                 <View style={styles.cardFooter}>
                     <View style={[styles.tag, { backgroundColor: itemColor + '20' }]}>
-                        <Text style={[styles.categoryText, { color: itemColor }]}>{item.category}</Text>
+                        <Text style={[styles.categoryText, { color: itemColor }]}>
+                            {item.category}
+                        </Text>
                     </View>
-                    <Text style={styles.cardDate}>🕒 {formatDateTime(item.date)}</Text>
+
+                    {item.date && (
+                        <Text style={styles.cardDate}>
+                            📅 {new Date(item.date).toLocaleDateString("th-TH")}
+                        </Text>
+                    )}
+
+                    {item.startTime && item.endTime && (
+                        <Text style={styles.cardDate}>
+                            🕒 {item.startTime} - {item.endTime}
+                        </Text>
+                    )}
                 </View>
             </View>
 
