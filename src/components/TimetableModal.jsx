@@ -179,7 +179,7 @@ export default function TimetableModal({
                                         <Text style={styles.label}>เวลาสอบ</Text>
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="09:00"
+                                            placeholder="09:00-12:00"
                                             value={form.examTime}
                                             onChangeText={(t) => setForm({ ...form, examTime: t })}
                                         />

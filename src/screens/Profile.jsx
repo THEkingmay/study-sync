@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#efbee6",
     borderRadius: 24,
     padding: 24,
     shadowColor: "#000",
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     shadowColor: "#6C63FF",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    // shadowRadius: 8,
     elevation: 6,
   },
   buttonText: {
